@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nova Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+</head>
+<body class="bg-white text-gray-800">
+
+  <!-- Navbar -->
+  <header class="flex justify-between items-center p-6 shadow-sm">
+    <h1 class="text-2xl font-bold">Nova Store</h1>
+    <button onclick="toggleCart()" class="bg-black text-white px-4 py-2 rounded-xl">
+      Cart (<span id="cart-count">0</span>)
+    </button>
+  </header>
+
+  <!-- Hero -->
+  <section class="text-center py-20 bg-gray-100">
+    <h2 class="text-4xl font-bold mb-4">Modern Style. Everyday Essentials.</h2>
+    <p class="mb-6 text-gray-600">Shop premium products easily.</p>
+  </section>
+
+  <!-- Products -->
+  <section class="p-10">
+    <h3 class="text-3xl font-bold text-center mb-10">Products</h3>
+    <div class="grid md:grid-cols-3 gap-8">
+
+      <div class="shadow-lg rounded-2xl p-4 text-center hover:scale-105 transition">
+        <img src="https://via.placeholder.com/300" class="rounded-xl mb-4" />
+        <h4 class="font-semibold">Product One</h4>
+        <p>$10</p>
+        <button onclick="addToCart('Product One', 10)" class="mt-2 bg-black text-white px-4 py-2 rounded-xl">Add to Cart</button>
+      </div>
+
+      <div class="shadow-lg rounded-2xl p-4 text-center hover:scale-105 transition">
+        <img src="https://via.placeholder.com/300" class="rounded-xl mb-4" />
+        <h4 class="font-semibold">Product Two</h4>
+        <p>$20</p>
+        <button onclick="addToCart('Product Two', 20)" class="mt-2 bg-black text-white px-4 py-2 rounded-xl">Add to Cart</button>
+      </div>
+
+      <div class="shadow-lg rounded-2xl p-4 text-center hover:scale-105 transition">
+        <img src="https://via.placeholder.com/300" class="rounded-xl mb-4" />
+        <h4 class="font-semibold">Product Three</h4>
+        <p>$30</p>
+        <button onclick="addToCart('Product Three', 30)" class="mt-2 bg-black text-white px-4 py-2 rounded-xl">Add to Cart</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Cart -->
+  <div id="cart" class="fixed right-0 top-0 w-80 h-full bg-white shadow-lg p-6 hidden">
+    <h3 class="text-xl font-bold mb-4">Your Cart</h3>
+    <ul id="cart-items" class="mb-4"></ul>
+    <p class="font-bold">Total: $<span id="total">0</span></p>
+    <input id="email" type="email" placeholder="Your email" class="w-full mt-3 p-2 border rounded" />
+    <button onclick="payWithPaystack()" class="mt-4 w-full bg-black text-white py-2 rounded-xl">Pay Now</button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center p-6 bg-gray-900 text-white mt-10">
+    <p>© 2026 Nova Store</p>
+  </footer>
+
+<script>
+let cart = [];
+
+function addToCart(name, price) {
+  cart.push({name, price});
+  updateCart();
+}
+
+function updateCart() {
+  const cartItems = document.getElementById('cart-items');
+  const totalEl = document.getElementById('total');
+  const countEl = document.getElementById('cart-count');
+
+  cartItems.innerHTML = '';
+  let total = 0;
+
+  cart.forEach(item => {
+    total += item.price;
+    const li = document.createElement('li');
+    li.textContent = `${item.name} - $${item.price}`;
+    cartItems.appendChild(li);
+  });
+
+  totalEl.textContent = total;
+  countEl.textContent = cart.length;
+}
+
+function toggleCart() {
+  document.getElementById('cart').classList.toggle('hidden');
+}
+
+function payWithPaystack() {
+  let total = cart.reduce((sum, item) => sum + item.price, 0);
+  let email = document.getElementById('email').value;
+
+  if (!email) {
+    alert('Enter your email');
+    return;
+  }
+
+  let handler = PaystackPop.setup({
+    key: 'YOUR_PUBLIC_KEY_HERE',
+    email: email,
+    amount: total * 100,
+    currency: 'NGN',
+    callback: function(response) {
+      alert('Payment successful! Ref: ' + response.reference);
+      cart = [];
+      updateCart();
+    },
+    onClose: function() {
+      alert('Transaction cancelled');
+    }
+  });
+
+  handler.openIframe();
+}
+</script>
+
+</body>
+</html>
